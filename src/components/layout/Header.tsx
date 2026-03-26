@@ -1,11 +1,6 @@
 import { useRef, useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import {
-  loadImageFromFile,
-  cropAndResizeFromImage,
-  cropAndResizeFromCanvas,
-  imageDataToTensor,
-} from '../../utils/imageProcessing';
+import { fileToImageData, canvasToImageData, imageDataToTensor } from '../../utils/imageProcessing';
 import { runInference } from '../../model/extractActivations';
 import { generateSampleImage1, generateSampleImage2 } from '../../utils/sampleImages';
 
@@ -14,7 +9,7 @@ export default function Header() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const {
-    model, modelStatus, setSourceImage, setImageData,
+    model, modelStatus, setImageData,
     setProcessedTensor, setInferenceStatus, setInferenceResult, setCurrentStep,
   } = useAppStore();
 
@@ -22,20 +17,18 @@ export default function Header() {
     setImageData(imageData);
     setCurrentStep(1);
 
-    let tensor: import('@tensorflow/tfjs').Tensor4D | null = null;
-    try {
-      tensor = imageDataToTensor(imageData);
-      setProcessedTensor(tensor);
+    if (!model) return;
 
-      if (model) {
-        setInferenceStatus('running');
-        const result = await runInference(model, tensor);
-        setInferenceResult(result);
-      }
+    setInferenceStatus('running');
+    try {
+      const tensor = imageDataToTensor(imageData);
+      setProcessedTensor(tensor);
+      const result = await runInference(model, tensor);
+      setInferenceResult(result);
     } catch (err) {
       console.error('Inference failed:', err);
       setInferenceStatus('error');
-      setError('CNN 추론에 실패했습니다. 콘솔을 확인해주세요.');
+      setError('CNN 추론 실패: ' + (err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -45,13 +38,11 @@ export default function Header() {
     setProcessing(true);
     setError(null);
     try {
-      const img = await loadImageFromFile(file);
-      setSourceImage(img);
-      const imageData = cropAndResizeFromImage(img);
+      const imageData = await fileToImageData(file);
       await runPipeline(imageData);
     } catch (err) {
-      console.error('File upload failed:', err);
-      setError(err instanceof Error ? err.message : '이미지 파일을 읽을 수 없습니다.');
+      console.error('Upload failed:', err);
+      setError(err instanceof Error ? err.message : '이미지 처리 실패');
     } finally {
       setProcessing(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -63,17 +54,11 @@ export default function Header() {
     setError(null);
     try {
       const canvas = sampleFn();
-      // Create an HTMLImageElement from the canvas for display in Step 1
-      const img = new Image();
-      img.src = canvas.toDataURL();
-      await new Promise<void>((resolve) => { img.onload = () => resolve(); });
-      setSourceImage(img);
-
-      const imageData = cropAndResizeFromCanvas(canvas);
+      const imageData = canvasToImageData(canvas);
       await runPipeline(imageData);
     } catch (err) {
-      console.error('Sample load failed:', err);
-      setError(err instanceof Error ? err.message : '샘플 이미지 생성에 실패했습니다.');
+      console.error('Sample failed:', err);
+      setError(err instanceof Error ? err.message : '샘플 처리 실패');
     } finally {
       setProcessing(false);
     }
@@ -125,9 +110,6 @@ export default function Header() {
           )}
           {modelStatus === 'error' && (
             <span className="text-sm text-[#ef4444]">모델 로드 실패</span>
-          )}
-          {processing && (
-            <span className="text-sm text-[#f59e0b] animate-pulse">CNN 추론 중...</span>
           )}
           {error && (
             <span className="text-sm text-[#ef4444]">{error}</span>

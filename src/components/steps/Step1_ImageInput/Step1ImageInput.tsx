@@ -7,22 +7,18 @@ const MAGNIFIER_SIZE = 7; // 7x7 pixel grid in magnifier
 const CELL_SIZE = 36;
 
 export default function Step1ImageInput() {
-  const { imageData, sourceImage } = useAppStore();
+  const { imageData } = useAppStore();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
   const [pixelInfo, setPixelInfo] = useState<{ x: number; y: number; r: number; g: number; b: number } | null>(null);
 
+  // Render imageData directly to canvas (no HTMLImageElement needed)
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !sourceImage) return;
+    if (!canvas || !imageData) return;
     const ctx = canvas.getContext('2d')!;
-
-    // Center crop and draw
-    const size = Math.min(sourceImage.width, sourceImage.height);
-    const sx = (sourceImage.width - size) / 2;
-    const sy = (sourceImage.height - size) / 2;
-    ctx.drawImage(sourceImage, sx, sy, size, size, 0, 0, IMAGE_SIZE_CONST, IMAGE_SIZE_CONST);
-  }, [sourceImage]);
+    ctx.putImageData(imageData, 0, 0);
+  }, [imageData]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!imageData) return;

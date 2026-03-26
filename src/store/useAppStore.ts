@@ -8,10 +8,8 @@ export interface AppState {
   setCurrentStep: (step: number) => void;
 
   // Image
-  sourceImage: HTMLImageElement | null;
   imageData: ImageData | null;
   processedTensor: tf.Tensor4D | null;
-  setSourceImage: (img: HTMLImageElement) => void;
   setImageData: (data: ImageData) => void;
   setProcessedTensor: (t: tf.Tensor4D) => void;
 
@@ -41,10 +39,8 @@ export const useAppStore = create<AppState>((set) => ({
   currentStep: 1,
   setCurrentStep: (step) => set({ currentStep: step }),
 
-  sourceImage: null,
   imageData: null,
   processedTensor: null,
-  setSourceImage: (img) => set({ sourceImage: img }),
   setImageData: (data) => set({ imageData: data }),
   setProcessedTensor: (t) => set({ processedTensor: t }),
 
