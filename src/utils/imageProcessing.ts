@@ -8,42 +8,47 @@ export function loadImageFromFile(file: File): Promise<HTMLImageElement> {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => resolve(img);
-      img.onerror = reject;
+      img.onerror = () => reject(new Error('이미지를 디코딩할 수 없습니다.'));
       img.src = e.target?.result as string;
     };
-    reader.onerror = reject;
+    reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다.'));
     reader.readAsDataURL(file);
   });
 }
 
-export function loadImageFromUrl(url: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
-    img.src = url;
-  });
-}
-
-export function cropAndResize(img: HTMLImageElement): { canvas: HTMLCanvasElement; imageData: ImageData } {
+export function cropAndResizeFromImage(img: HTMLImageElement): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = IMAGE_SIZE;
   canvas.height = IMAGE_SIZE;
   const ctx = canvas.getContext('2d')!;
 
-  // Use naturalWidth/naturalHeight for accurate dimensions (important for SVGs)
-  const imgW = img.naturalWidth || img.width || IMAGE_SIZE;
-  const imgH = img.naturalHeight || img.height || IMAGE_SIZE;
+  const imgW = img.naturalWidth || img.width;
+  const imgH = img.naturalHeight || img.height;
+
+  if (imgW === 0 || imgH === 0) {
+    throw new Error('이미지 크기가 0입니다. 유효한 이미지를 업로드해주세요.');
+  }
+
+  // Fill white background first (in case of transparency)
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, IMAGE_SIZE, IMAGE_SIZE);
 
   // Center crop to square
   const size = Math.min(imgW, imgH);
   const sx = (imgW - size) / 2;
   const sy = (imgH - size) / 2;
-
   ctx.drawImage(img, sx, sy, size, size, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
-  const imageData = ctx.getImageData(0, 0, IMAGE_SIZE, IMAGE_SIZE);
 
-  return { canvas, imageData };
+  return ctx.getImageData(0, 0, IMAGE_SIZE, IMAGE_SIZE);
+}
+
+export function cropAndResizeFromCanvas(sourceCanvas: HTMLCanvasElement): ImageData {
+  const canvas = document.createElement('canvas');
+  canvas.width = IMAGE_SIZE;
+  canvas.height = IMAGE_SIZE;
+  const ctx = canvas.getContext('2d')!;
+  ctx.drawImage(sourceCanvas, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
+  return ctx.getImageData(0, 0, IMAGE_SIZE, IMAGE_SIZE);
 }
 
 export function imageDataToTensor(imageData: ImageData): tf.Tensor4D {

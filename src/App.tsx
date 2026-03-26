@@ -13,7 +13,7 @@ import Step6DenseLayer from './components/steps/Step6_DenseLayer/Step6DenseLayer
 import LoadingSpinner from './components/shared/LoadingSpinner';
 
 function App() {
-  const { currentStep, modelStatus, setModel, setModelStatus } = useAppStore();
+  const { currentStep, modelStatus, inferenceStatus, setModel, setModelStatus } = useAppStore();
 
   // Build model on mount
   useEffect(() => {
@@ -61,7 +61,18 @@ function App() {
             <p className="text-[#94a3b8] text-sm mt-2">페이지를 새로고침해주세요.</p>
           </div>
         ) : (
-          renderStep()
+          <>
+            {renderStep()}
+            {inferenceStatus === 'running' && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-[#1e293b] rounded-xl p-8 border border-[#334155] text-center">
+                  <div className="w-12 h-12 border-4 border-[#334155] border-t-[#6366f1] rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-white font-medium">CNN 추론 중...</p>
+                  <p className="text-[#94a3b8] text-sm mt-1">각 층의 활성화 데이터를 추출하고 있습니다</p>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </main>
       <footer className="bg-[#1e293b] border-t border-[#334155] px-6 py-3 text-center">

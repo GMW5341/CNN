@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import { loadImageFromFile, loadImageFromUrl, cropAndResize, imageDataToTensor } from '../../utils/imageProcessing';
+import {
+  loadImageFromFile,
+  cropAndResizeFromImage,
+  cropAndResizeFromCanvas,
+  imageDataToTensor,
+} from '../../utils/imageProcessing';
 import { runInference } from '../../model/extractActivations';
-
-const SAMPLE_IMAGES = [
-  { name: '샘플 1', url: '/samples/sample1.svg' },
-  { name: '샘플 2', url: '/samples/sample2.svg' },
-];
+import { generateSampleImage1, generateSampleImage2 } from '../../utils/sampleImages';
 
 export default function Header() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -17,16 +18,14 @@ export default function Header() {
     setProcessedTensor, setInferenceStatus, setInferenceResult, setCurrentStep,
   } = useAppStore();
 
-  const processImage = async (img: HTMLImageElement) => {
-    setProcessing(true);
-    setError(null);
+  const runPipeline = async (imageData: ImageData) => {
+    setImageData(imageData);
+    setCurrentStep(1);
+
+    let tensor: import('@tensorflow/tfjs').Tensor4D | null = null;
     try {
-      setSourceImage(img);
-      const { imageData } = cropAndResize(img);
-      setImageData(imageData);
-      const tensor = imageDataToTensor(imageData);
+      tensor = imageDataToTensor(imageData);
       setProcessedTensor(tensor);
-      setCurrentStep(1);
 
       if (model) {
         setInferenceStatus('running');
@@ -34,35 +33,49 @@ export default function Header() {
         setInferenceResult(result);
       }
     } catch (err) {
-      console.error('Image processing failed:', err);
-      setError('이미지 처리에 실패했습니다.');
+      console.error('Inference failed:', err);
       setInferenceStatus('error');
-    } finally {
-      setProcessing(false);
+      setError('CNN 추론에 실패했습니다. 콘솔을 확인해주세요.');
     }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setProcessing(true);
+    setError(null);
     try {
       const img = await loadImageFromFile(file);
-      await processImage(img);
+      setSourceImage(img);
+      const imageData = cropAndResizeFromImage(img);
+      await runPipeline(imageData);
     } catch (err) {
-      console.error('File load failed:', err);
-      setError('이미지 파일을 읽을 수 없습니다.');
+      console.error('File upload failed:', err);
+      setError(err instanceof Error ? err.message : '이미지 파일을 읽을 수 없습니다.');
+    } finally {
+      setProcessing(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
-    // Reset input so the same file can be re-selected
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleSampleSelect = async (url: string) => {
+  const handleSampleSelect = async (sampleFn: () => HTMLCanvasElement) => {
+    setProcessing(true);
+    setError(null);
     try {
-      const img = await loadImageFromUrl(url);
-      await processImage(img);
+      const canvas = sampleFn();
+      // Create an HTMLImageElement from the canvas for display in Step 1
+      const img = new Image();
+      img.src = canvas.toDataURL();
+      await new Promise<void>((resolve) => { img.onload = () => resolve(); });
+      setSourceImage(img);
+
+      const imageData = cropAndResizeFromCanvas(canvas);
+      await runPipeline(imageData);
     } catch (err) {
       console.error('Sample load failed:', err);
-      setError('샘플 이미지를 로드할 수 없습니다.');
+      setError(err instanceof Error ? err.message : '샘플 이미지 생성에 실패했습니다.');
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -82,7 +95,7 @@ export default function Header() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/svg+xml"
+            accept="image/jpeg,image/png,image/webp"
             onChange={handleFileUpload}
             className="hidden"
           />
@@ -93,21 +106,28 @@ export default function Header() {
           >
             {processing ? '처리 중...' : '새 이미지 업로드'}
           </button>
-          {SAMPLE_IMAGES.map((sample, i) => (
-            <button
-              key={i}
-              onClick={() => handleSampleSelect(sample.url)}
-              disabled={isDisabled}
-              className="px-4 py-2 bg-[#334155] hover:bg-[#475569] disabled:text-[#64748b] text-white rounded-lg text-sm font-medium transition-colors"
-            >
-              {sample.name}
-            </button>
-          ))}
+          <button
+            onClick={() => handleSampleSelect(generateSampleImage1)}
+            disabled={isDisabled}
+            className="px-4 py-2 bg-[#334155] hover:bg-[#475569] disabled:text-[#64748b] text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            샘플 1 (색소침착)
+          </button>
+          <button
+            onClick={() => handleSampleSelect(generateSampleImage2)}
+            disabled={isDisabled}
+            className="px-4 py-2 bg-[#334155] hover:bg-[#475569] disabled:text-[#64748b] text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            샘플 2 (주름)
+          </button>
           {modelStatus === 'building' && (
-            <span className="text-sm text-[#f59e0b]">모델 로딩중...</span>
+            <span className="text-sm text-[#f59e0b] animate-pulse">모델 로딩중...</span>
           )}
           {modelStatus === 'error' && (
             <span className="text-sm text-[#ef4444]">모델 로드 실패</span>
+          )}
+          {processing && (
+            <span className="text-sm text-[#f59e0b] animate-pulse">CNN 추론 중...</span>
           )}
           {error && (
             <span className="text-sm text-[#ef4444]">{error}</span>
