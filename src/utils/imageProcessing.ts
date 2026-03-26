@@ -19,9 +19,8 @@ export function loadImageFromFile(file: File): Promise<HTMLImageElement> {
 export function loadImageFromUrl(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
     img.onload = () => resolve(img);
-    img.onerror = reject;
+    img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
     img.src = url;
   });
 }
@@ -32,10 +31,14 @@ export function cropAndResize(img: HTMLImageElement): { canvas: HTMLCanvasElemen
   canvas.height = IMAGE_SIZE;
   const ctx = canvas.getContext('2d')!;
 
+  // Use naturalWidth/naturalHeight for accurate dimensions (important for SVGs)
+  const imgW = img.naturalWidth || img.width || IMAGE_SIZE;
+  const imgH = img.naturalHeight || img.height || IMAGE_SIZE;
+
   // Center crop to square
-  const size = Math.min(img.width, img.height);
-  const sx = (img.width - size) / 2;
-  const sy = (img.height - size) / 2;
+  const size = Math.min(imgW, imgH);
+  const sx = (imgW - size) / 2;
+  const sy = (imgH - size) / 2;
 
   ctx.drawImage(img, sx, sy, size, size, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
   const imageData = ctx.getImageData(0, 0, IMAGE_SIZE, IMAGE_SIZE);
