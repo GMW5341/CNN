@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="224" height="224" viewBox="0 0 224 224">
+  <defs>
+    <radialGradient id="skin2" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#ffe0c0"/>
+      <stop offset="60%" stop-color="#f0c8a0"/>
+      <stop offset="100%" stop-color="#d4a87a"/>
+    </radialGradient>
+    <radialGradient id="blush2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(200,100,100,0.25)"/>
+      <stop offset="100%" stop-color="rgba(200,100,100,0)"/>
+    </radialGradient>
+  </defs>
+  <!-- Face base -->
+  <ellipse cx="112" cy="118" rx="78" ry="92" fill="url(#skin2)"/>
+  <!-- Eyes -->
+  <ellipse cx="85" cy="100" rx="14" ry="9" fill="#fff"/>
+  <ellipse cx="139" cy="100" rx="14" ry="9" fill="#fff"/>
+  <circle cx="85" cy="100" r="5.5" fill="#3a2818"/>
+  <circle cx="139" cy="100" r="5.5" fill="#3a2818"/>
+  <circle cx="87" cy="98" r="1.8" fill="#fff"/>
+  <circle cx="141" cy="98" r="1.8" fill="#fff"/>
+  <!-- Eyebrows -->
+  <path d="M63 85 Q85 76 103 83" stroke="#5a3418" stroke-width="2.5" fill="none"/>
+  <path d="M121 83 Q139 76 161 85" stroke="#5a3418" stroke-width="2.5" fill="none"/>
+  <!-- Nose -->
+  <path d="M109 105 Q112 128 115 105" stroke="#c4956a" stroke-width="1.5" fill="none"/>
+  <ellipse cx="112" cy="125" rx="7" ry="3.5" fill="#d4a574" opacity="0.5"/>
+  <!-- Mouth -->
+  <path d="M95 148 Q112 158 129 148" stroke="#b86060" stroke-width="2" fill="#c87070"/>
+  <!-- Cheeks -->
+  <circle cx="62" cy="125" r="18" fill="url(#blush2)"/>
+  <circle cx="162" cy="125" r="18" fill="url(#blush2)"/>
+  <!-- Wrinkle patterns (crow's feet) -->
+  <path d="M55 95 Q48 100 42 95" stroke="#c4956a" stroke-width="0.8" opacity="0.5" fill="none"/>
+  <path d="M55 100 Q48 105 42 100" stroke="#c4956a" stroke-width="0.6" opacity="0.4" fill="none"/>
+  <path d="M169 95 Q176 100 182 95" stroke="#c4956a" stroke-width="0.8" opacity="0.5" fill="none"/>
+  <path d="M169 100 Q176 105 182 100" stroke="#c4956a" stroke-width="0.6" opacity="0.4" fill="none"/>
+  <!-- Dark circles -->
+  <ellipse cx="85" cy="112" rx="12" ry="5" fill="#a08070" opacity="0.3"/>
+  <ellipse cx="139" cy="112" rx="12" ry="5" fill="#a08070" opacity="0.3"/>
+  <!-- Texture/pore areas on cheeks -->
+  <g opacity="0.15">
+    <circle cx="70" cy="120" r="0.8" fill="#8a7060"/>
+    <circle cx="73" cy="122" r="0.8" fill="#8a7060"/>
+    <circle cx="68" cy="124" r="0.8" fill="#8a7060"/>
+    <circle cx="154" cy="120" r="0.8" fill="#8a7060"/>
+    <circle cx="157" cy="122" r="0.8" fill="#8a7060"/>
+    <circle cx="152" cy="124" r="0.8" fill="#8a7060"/>
+  </g>
+  <!-- Forehead lines -->
+  <path d="M78 52 Q112 47 146 52" stroke="#c4956a" stroke-width="0.7" opacity="0.5" fill="none"/>
+  <path d="M82 58 Q112 54 142 58" stroke="#c4956a" stroke-width="0.5" opacity="0.35" fill="none"/>
+  <path d="M85 64 Q112 61 139 64" stroke="#c4956a" stroke-width="0.4" opacity="0.25" fill="none"/>
+</svg>
