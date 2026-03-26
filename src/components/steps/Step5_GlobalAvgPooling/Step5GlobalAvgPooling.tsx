@@ -3,7 +3,6 @@ import { useAppStore } from '../../../store/useAppStore';
 import StepExplanation from '../../shared/StepExplanation';
 import { activationToGrayscale } from '../../../utils/colorUtils';
 
-const BAR_HEIGHT = 4;
 const MAX_BARS = 512;
 
 export default function Step5GlobalAvgPooling() {

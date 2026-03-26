@@ -246,7 +246,7 @@ export default function Step6DenseLayer() {
               </h3>
               <p className="text-xs text-[#94a3b8] mb-2">가장 영향력 높은 입력 노드:</p>
               <div className="space-y-1">
-                {topInputNodes.map(({ inputIdx, weight, value }) => (
+                {topInputNodes.map(({ inputIdx, weight }) => (
                   <div key={inputIdx} className="flex items-center gap-2 text-xs">
                     <span className="font-mono text-[#64748b]">#{inputIdx}</span>
                     <div className="flex-1 h-1 bg-[#0f172a] rounded">

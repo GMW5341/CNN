@@ -4,8 +4,6 @@ import StepExplanation from '../../shared/StepExplanation';
 import { activationToGrayscale } from '../../../utils/colorUtils';
 
 const DISPLAY_SIZE = 224;
-const GRID_SIZE = 8; // show 8x8 region for the animation detail view
-const CELL_SIZE = 28;
 
 export default function Step2Convolution() {
   const { imageData, activations, model, selectedFilterIndex, setSelectedFilterIndex, animationSpeed } = useAppStore();

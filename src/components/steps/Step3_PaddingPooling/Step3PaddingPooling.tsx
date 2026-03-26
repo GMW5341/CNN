@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAppStore } from '../../../store/useAppStore';
 import StepExplanation from '../../shared/StepExplanation';
 
@@ -12,13 +12,12 @@ export default function Step3PaddingPooling() {
   const [viewMode, setViewMode] = useState<ViewMode>('padding');
   const [poolPos, setPoolPos] = useState({ x: 0, y: 0 });
   const [isAnimating, setIsAnimating] = useState(false);
-  const animRef = useRef<number>(0);
 
   // Get a small region from conv1 for demonstration
   const conv1 = activations['conv1'];
   const sampleGrid: number[][] = [];
   if (conv1) {
-    const [, h, w, channels] = conv1.shape;
+    const [, , w, channels] = conv1.shape;
     for (let y = 0; y < GRID_SIZE; y++) {
       const row: number[] = [];
       for (let x = 0; x < GRID_SIZE; x++) {

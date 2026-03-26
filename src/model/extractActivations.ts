@@ -48,8 +48,8 @@ export async function runInference(
   const weightsData = await weightsT.data();
   const biasesData = await biasesT.data();
 
-  const numInputs = weightsT.shape[0]; // 512
-  const numOutputs = weightsT.shape[1]; // 65
+  const numInputs = weightsT.shape[0]!; // 512
+  const numOutputs = weightsT.shape[1]!; // 65
   const weights: number[][] = [];
   for (let i = 0; i < numInputs; i++) {
     const row: number[] = [];

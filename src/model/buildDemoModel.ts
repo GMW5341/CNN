@@ -36,7 +36,7 @@ export function buildDemoModel(): tf.LayersModel {
     switch (config.type) {
       case 'conv2d':
         x = tf.layers.conv2d({
-          filters: config.filters,
+          filters: config.filters!,
           kernelSize: config.kernelSize!,
           padding: 'same',
           activation: 'relu',
